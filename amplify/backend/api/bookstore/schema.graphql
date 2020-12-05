@@ -1,0 +1,26 @@
+type Order @model @auth(rules: [{allow: private, operations: [create, read]}]) {
+  id: ID!
+  date: AWSDate
+  total: Float
+  user: String
+  OrderBooks: [OrderBook] @connection(keyName: "byOrder", fields: ["id"])
+}
+
+type Book @model @auth(rules: [{allow: groups, groups: ["admin"], operations: [read, create, update, delete]}, {allow: private, operations: [read]}]) {
+  id: ID!
+  title: String
+  description: String
+  price: Float
+  author: String
+  is_featured: Boolean
+  orders: [OrderBook] @connection(keyName: "byBook", fields: ["id"])
+}
+
+type OrderBook @model(queries: null) @key(name: "byOrder", fields: ["orderID", "bookID"]) @key(name: "byBook", fields: ["bookID", "orderID"]) @auth(rules: [{allow: private, operations: [create, read]}, {allow: groups, groups: ["admin"], operations: [read, create, update, delete]}, {allow: private, operations: [read]}]) {
+  id: ID!
+  orderID: ID!
+  bookID: ID!
+  order: Order! @connection(fields: ["orderID"])
+  book: Book! @connection(fields: ["bookID"])
+}
+ 
